@@ -1,17 +1,3 @@
-                        
-//include <18mmshaftsettings.scad>
-/* Issues
-+ driveshaft too tight in case
-+ driveshaft too tight on biggear
-+ dshaft too tight on littlegear
-+ second setscrew on littlegear
-+ less extension on littlegear
-+ need washers around biggear
-- need washers around encoder disk
-- add lip
-+make gear negative space simpler
-*/
-
 include <driveshaft.scad>
 include <enc.scad>;
 use <gears.scad>;
@@ -36,9 +22,11 @@ module case_bolt_clearance(rot=0, boss=false) {
         cylinder(r=4.2, h=9, center=true);
     }
     else {
-        cylinder(r=1.8, h=30, center=true);
+        cylinder(r=1.5, h=30, center=true);
         translate([0,0,54])
             cylinder(r=3.5, h=100, center=true);
+        translate([0,0,2.25])
+            cylinder(r=2, h=4.5, center=true);
         /*
         if(rot == -1) {
         translate([0,0,-54])
@@ -165,7 +153,111 @@ module enclosure_blank(neg = true, t = 1.5) {
 //            cylinder(r=3.5, h=100, center=true);
 //    }    
 //}
+module pillow(screws=true) {
+base_t = 15;
+tab_t = 8;
+base_w1 = shaft_diameter+tab_t*2;
+base_w2 = 70;
+skew=0;
+shift=0;
+base_h = 36.5;
+hole_d=6;
 
+screw_head_d=7;
+screw_thread_3=3;
+screw_shank_d=5;
+
+screw_off = shaft_diameter/2 + tab_t/2;
+
+    translate([0,shift,0])
+    difference() {
+    union() {
+       //Trapezoid body
+        hull() {
+       cube([1,base_w1,base_t], center=true);
+            cylinder(r=base_w1/2,h=base_t, center=true);
+       translate([base_h-.5,skew,0])
+            cube([1,base_w2,base_t], center=true);
+        }
+        difference() {
+            //Base plate
+        hull() {
+            translate([base_h-tab_t/2,base_w2/2+hole_d/2,0])
+                rotate(90,[0,1,0])
+                    cylinder(r=base_t/2, h=tab_t, center=true);
+            translate([base_h-tab_t/2,-base_w2/2-hole_d/2,0])
+                rotate(90,[0,1,0])
+                    cylinder(r=base_t/2, h=tab_t, center=true);
+        }
+        // Base screw holes
+        translate([base_h,base_w2/2+4+skew,0])
+            rotate(90,[0,1,0])
+                cylinder(r=hole_d/2, h=40, center=true);
+        translate([base_h,-base_w2/2-4+skew,0])
+            rotate(90,[0,1,0])
+                cylinder(r=hole_d/2, h=40, center=true);
+        }
+        
+       
+        
+       
+    }
+    if (screws) {
+     // Top screw holes
+     translate([-10-4,-screw_off,0])
+        rotate(90,[0,1,0])
+            cylinder(r=screw_head_d/2, h=20, center=true);
+     translate([-2.5,-screw_off,0])
+        rotate(90,[0,1,0])
+            cylinder(r=screw_shank_d/2, h=5, center=true);
+     translate([-2.5,-screw_off,0])
+        rotate(90,[0,1,0])
+            cylinder(r=screw_thread_d/2, h=50, center=true);
+
+     translate([-10-4,screw_off,0])
+        rotate(90,[0,1,0])
+            cylinder(r=screw_head_d/2, h=20, center=true);
+     translate([-2.5,screw_off,0])
+        rotate(90,[0,1,0])
+            cylinder(r=screw_shank_d/2, h=5, center=true);
+     translate([-2.5,screw_off,0])
+        rotate(90,[0,1,0])
+            cylinder(r=screw_thread_d/2, h=50, center=true);
+    }
+    //Oil hole
+     translate([-25,0,0])
+        rotate(90,[0,1,0])
+            cylinder(r=screw_thread_d/2, h=50, center=true);
+     translate([-25-shaft_diameter/2-tab_t+3,0,0])
+        rotate(90,[0,1,0])
+            cylinder(r=screw_shank_d/2, h=50, center=true);
+driveshaft();
+    }
+
+}
+module pillow_top() {
+    difference() {
+        pillow();
+        translate([50,0,0]) cube([100,100,100], center=true);
+    }
+}
+module pillow_bottom() {
+     difference() {
+        pillow();
+        translate([-50,0,0]) cube([100,100,100], center=true);
+    }   
+}
+module pillow_pair() {
+    translate([-10,0,0]) pillow_top();
+    pillow_bottom();
+}
+pillow_pair();
+translate([0,70,0]) rotate(180,[0,1,0]) pillow(screws=falses);
+//pillow();
+//pillow_top();
+//pillow_bottom();
+
+//driveshaft();
 module base() {
 base_t = 20;
 base_w1 = 70;
@@ -217,7 +309,7 @@ difference() {
     driveshaft();
     case_boltholes();
     // Motor wire hole
-    translate([22,48.5,90]) rotate(90,[0,1,0])
+    translate([22,40,88]) rotate(90,[0,1,0])
         cylinder(r=3, h=20, center=true);
     // Encoder wire hole
     translate([20,22,-28]) rotate(90,[0,1,0])
@@ -246,8 +338,8 @@ module enclosure_top() {
 //enclosure_bottom();
 //enclosure_blank();
 //enclosure();
-rotate(-90,[0,1,0])
-enclosure_top();
+//rotate(-90,[0,1,0])
+//enclosure_top();
 //rotate(90,[0,1,0])
 //enclosure_bottom();
 //intersection() {
