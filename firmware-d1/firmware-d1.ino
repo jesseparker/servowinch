@@ -1,3 +1,8 @@
+#include <ESP8266WiFi.h>
+#include <WiFiClient.h>
+#include <ESP8266WebServer.h>
+#include <ESP8266mDNS.h>
+
 #define serial_debug true
 #define baud 115200
 
@@ -42,7 +47,15 @@ int PulseCount;
 int commandPosition;
 
 String inString = "";
+char position[20];
 
+
+const char* host = "wemos";
+const char* ssid = "souther";
+const char* password = "poochies";
+
+ESP8266WebServer server(80);
+const char* serverIndex = "<html><head><style>input {font-size: 100pt} </style></head><body onload='document.getElementById(\"position\").focus();'><h1>Servo Position</h1><form action='/set' method='post'><input type='number' inputmode='numeric' pattern='[0-9]*' type='text' id='position' name='position' value='0' size='4' onfocus='this.select();'><input type='submit' value='Go'></form></body></html>";
 
 
 void moveForward(int delta) {
@@ -94,6 +107,7 @@ void motorOff() {
 //}
 
 void setup() {
+  
   Serial.begin(baud);
   while (!Serial) {
     ; // wait for serial port to connect. Needed for native USB port only
@@ -118,9 +132,55 @@ void setup() {
   complete = true;
   count = 0;
   count2 = 0;
+
+
+  WiFi.mode(WIFI_AP_STA);
+  WiFi.begin(ssid, password);
+  if(WiFi.waitForConnectResult() == WL_CONNECTED){
+    MDNS.begin(host);
+    server.on("/", HTTP_GET, [](){
+      server.sendHeader("Connection", "close");
+      server.send(200, "text/html", serverIndex);
+    });
+    server.on("/set", HTTP_POST, [](){
+
+  if (server.hasArg("position")) {
+    server.arg("position").toCharArray(position, 20);
+    
+    commandPosition = atoi(position);
+  }
+      
+      server.sendHeader("Connection", "close");
+      server.send(200, "text/html", serverIndex);
+    });
+    server.on("/on", HTTP_GET, [](){
+
+commandPosition = 0;
+      
+      server.sendHeader("Connection", "close");
+      server.send(200, "text/html", serverIndex);
+    });
+    server.on("/off", HTTP_GET, [](){
+commandPosition = 100;
+      
+      server.sendHeader("Connection", "close");
+      server.send(200, "text/html", serverIndex);
+    });
+
+    server.begin();
+    MDNS.addService("http", "tcp", 80);
+
+    Serial.printf("Ready! Open http://%s.local in your browser\n", host);
+  } else {
+    Serial.println("WiFi Failed");
+  }
+
+
 }
 
 void loop() {
+
+  server.handleClient();
 
   while (Serial.available() > 0) {
     int inChar = Serial.read();
