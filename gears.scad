@@ -1,9 +1,9 @@
 include <MCAD/involute_gears.scad>;
-//include <18mmshaftsettings.scad>
+include <driveshaft.scad>
 use <12vmotor.scad>
 
-shaft_diameter = 18;
-shaft_height = 200;
+//shaft_diameter = 18;
+//shaft_height = 200;
 //$fn=100;
 		
      
@@ -135,7 +135,7 @@ module biggearvol(neg = false) {
     }
     else biggear();
 }
-//biggearvol(neg=true);
+//biggearvol(neg=false);
 
 module littlegearvol(neg = false) {
     $fn=20;
@@ -160,8 +160,8 @@ module littlegearvol(neg = false) {
 //translate([45,0,t+6])
 
 //rotate(180,[1,0,0])
-littlegearvol(neg=false);
-%littlegearvol(neg=true);
+//littlegearvol(neg=false);
+//%littlegearvol(neg=true);
 
-//biggearvol(neg=false);
+biggearvol(neg=false);
 //%biggearvol(neg=true);
