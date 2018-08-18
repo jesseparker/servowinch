@@ -13,16 +13,13 @@
 #define motorPlus D2
 #define motorMinus D3
 
-//#define motor2Enable 7
-//#define motor2Plus 8
-//#define motor2Minus 9
 
 #define spd3 1024/2.5
-#define spd2 1024/2
+#define spd2 1024/1.8
 #define spd1 1024
 
-#define spd1d 10
-#define spd2d 5
+#define spd1d 4 
+#define spd2d 2
 
 
 int count = 0;
@@ -52,10 +49,58 @@ char position[20];
 
 const char* host = "wemos";
 const char* ssid = "souther";
-const char* password = "poochies";
+const char* password = "";
 
 ESP8266WebServer server(80);
-const char* serverIndex = "<html><head><style>input {font-size: 100pt} </style></head><body onload='document.getElementById(\"position\").focus();'><h1>Servo Position</h1><form action='/set' method='post'><input type='number' inputmode='numeric' pattern='[0-9]*' type='text' id='position' name='position' value='0' size='4' onfocus='this.select();'><input type='submit' value='Go'></form></body></html>";
+const char* serverIndex = "<html>"
+"<head>"
+"<style>"
+"input {font-size: 100pt}"
+"</style>"
+"<script>"
+"function getPositionUpdate() {"
+"    var xmlhttp = new XMLHttpRequest();"
+""
+"    xmlhttp.onreadystatechange = function() {"
+"        if (xmlhttp.readyState == XMLHttpRequest.DONE) {"
+"           if (xmlhttp.status == 200) {"
+"               document.getElementById('pos').innerHTML = xmlhttp.responseText;"
+"           }"
+"        }"
+"    };"
+""
+"    xmlhttp.open('GET', '/position', true);"
+"    xmlhttp.send();"
+"    setTimeout(function() {getPositionUpdate()}, 500);"
+"}"
+"function setPosition() {"
+"    var xmlhttp = new XMLHttpRequest();"
+""
+"    xmlhttp.onreadystatechange = function() {"
+"        if (xmlhttp.readyState == XMLHttpRequest.DONE) {"
+"           if (xmlhttp.status == 200) {"
+"               document.getElementById('com').innerHTML = xmlhttp.responseText;"
+"           }"
+"        }"
+"    };"
+""
+"    xmlhttp.open('POST', '/setPosition', true);"
+"    xmlhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');"
+"    xmlhttp.send('position='+document.getElementById('position').value);"
+"    document.getElementById('position').select();"
+"}"
+"setTimeout(function() {getPositionUpdate()}, 500);"
+"</script>"
+"</head>"
+"<body onload='document.getElementById(\"position\").focus();'>"
+"<h1>Servo Position</h1>"
+"<p>Position <span id='pos'>unknown</span> Command <span id='com'>unknown</span></p>"
+"<form action='#' method='post' onsubmit='setPosition(); return false;'>"
+"<input type='number' inputmode='numeric' pattern='[0-9]*' type='text' id='position' name='position' value='0' size='4' onfocus='this.select();'>"
+"<input type='button' onclick='setPosition(); return false;' value='set'>"
+"</form>"
+"</body>"
+"</html>";
 
 
 void moveForward(int delta) {
@@ -69,11 +114,7 @@ void moveForward(int delta) {
   else
     analogWrite(motorEnable, spd3);
 }
-//void move2Forward() {
-//    digitalWrite(motor2Plus, HIGH);
-//    digitalWrite(motor2Minus, LOW);
-//    digitalWrite(motor2Enable, HIGH);
-//}
+
 
 void moveBackward(int delta) {
   digitalWrite(motorPlus, LOW);
@@ -87,24 +128,12 @@ void moveBackward(int delta) {
     analogWrite(motorEnable, spd3);
 
 }
-//void move2Backward() {
-//    digitalWrite(motor2Plus, LOW);
-//    digitalWrite(motor2Minus, HIGH);
-//    digitalWrite(motor2Enable, HIGH);
-
-//}
-
 
 void motorOff() {
   analogWrite(motorEnable, 0);
   digitalWrite(motorPlus, LOW);
   digitalWrite(motorMinus, LOW);
 }
-//void motor2Off() {
-//    digitalWrite(motor2Enable, LOW);
-//    digitalWrite(motor2Plus, LOW);
-//    digitalWrite(motor2Minus, LOW);
-//}
 
 void setup() {
   
@@ -112,21 +141,14 @@ void setup() {
   while (!Serial) {
     ; // wait for serial port to connect. Needed for native USB port only
   }
-  //  for (count = 0; count < 4; count++) {
-  //    pinMode(motorPins[count], OUTPUT);
-  //  }
+
   pinMode(SENSOR_A, INPUT);
   pinMode(SENSOR_B, INPUT);
   pinMode(motorEnable, OUTPUT);
   pinMode(motorPlus, OUTPUT);
   pinMode(motorMinus, OUTPUT);
 
-  //   pinMode(motor2Enable, OUTPUT);
-  //  pinMode(motor2Plus, OUTPUT);
-  //   pinMode(motor2Minus, OUTPUT);
-
   motorOff();
-  //   motor2Off();
 
   PulseCount = 0;
   complete = true;
@@ -142,6 +164,7 @@ void setup() {
       server.sendHeader("Connection", "close");
       server.send(200, "text/html", serverIndex);
     });
+    
     server.on("/set", HTTP_POST, [](){
 
   if (server.hasArg("position")) {
@@ -153,18 +176,22 @@ void setup() {
       server.sendHeader("Connection", "close");
       server.send(200, "text/html", serverIndex);
     });
-    server.on("/on", HTTP_GET, [](){
+   server.on("/position", HTTP_GET, [](){
 
-commandPosition = 0;
       
       server.sendHeader("Connection", "close");
-      server.send(200, "text/html", serverIndex);
+      server.send(200, "text/html", String(PulseCount));
     });
-    server.on("/off", HTTP_GET, [](){
-commandPosition = 100;
-      
+
+   server.on("/setPosition", HTTP_POST, [](){
+
+   if (server.hasArg("position")) {
+    server.arg("position").toCharArray(position, 20);
+    
+    commandPosition = atoi(position);
+  }     
       server.sendHeader("Connection", "close");
-      server.send(200, "text/html", serverIndex);
+      server.send(200, "text/html", String(commandPosition));
     });
 
     server.begin();
