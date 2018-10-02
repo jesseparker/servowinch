@@ -2,15 +2,18 @@ include <driveshaft.scad>
 include <enc.scad>;
 use <gears.scad>;
 use <12vmotor.scad>;
-shaft_height = 200;
+shaft_height = 300;
+//$fs = .2;
 
 case_bolts = [
 // [x,y,        rotation of trap
     [-4,-29,     -1],
     [-6,37,     -1],
-    [40,16,     -1],
-    [40,64.5,     -1],
-    [97,40,     -1],
+ //   [40,16,     -1],
+ //   [40,64.5,     -1],
+ //   [97,40,     -1],
+    [83,-20,     -1],
+    [83,18,     -1],
 ];
 
 
@@ -115,6 +118,8 @@ module assembly(neg = false) {
             encoder_pcb(neg=neg);
         gm_disp()
             12vmotor(neg = neg);
+        controller_disp()
+            controller();
 }
 
 module enclosure_blank(neg = true, t = 1.5) {
@@ -251,8 +256,8 @@ module pillow_pair() {
     translate([-10,0,0]) pillow_top();
     pillow_bottom();
 }
-pillow_pair();
-translate([0,70,0]) rotate(180,[0,1,0]) pillow(screws=falses);
+//pillow_pair();
+//translate([0,70,0]) rotate(180,[0,1,0]) pillow(screws=falses);
 //pillow();
 //pillow_top();
 //pillow_bottom();
@@ -263,7 +268,7 @@ base_t = 20;
 base_w1 = 70;
 base_w2 = 100;
 skew=0;
-shift=9;
+shift=15;
 base_h = 36.5;
     tab_t = 8;
     
@@ -293,23 +298,199 @@ base_h = 36.5;
             cylinder(r=4, h=40, center=true);
 
 }
+
+    //translate([0,0,72]) pillow();
+    translate([0,shift,72])
+    difference() {
+    union() {
+   //translate([base_h/2,0,0])
+    hull() {
+   cube([1,base_w1,base_t], center=true);
+
+   translate([0,-shift,0])
+        //cube([1,base_w1,base_t], center=true);
+        cylinder(r=pdia/2, h=base_t, center=true);
+   translate([base_h-.5,skew,0])
+        cube([1,base_w2,base_t], center=true);
+    }
+    difference() {
+       translate([base_h-tab_t/2,skew,0])
+        cube([tab_t,base_w2+20,base_t], center=true);
+    // base mount holes
+    translate([base_h,base_w2/2+4+skew,0])
+        rotate(90,[0,1,0])
+            cylinder(r=3, h=40, center=true);
+    translate([base_h,-base_w2/2-4+skew,0])
+        rotate(90,[0,1,0])
+            cylinder(r=3, h=40, center=true);
+    }
 }
+    //cable channel through base
+    //translate([base_h-7,base_w1/2-9,0])
+    //        cylinder(r=4, h=40, center=true);
+
+}
+
+rotate(-90-pangle/2, [0,0,1])
+translate([0,0,18])
+fairleed_holder();
+
+}
+//base();
+
+positions=12;
+pangle=360/(positions);
+pdia=50;
+
+pwidth=pdia/2*sin(pangle/2)*2;
+plen = pdia/2*cos(pangle/2);
+pt=5;
+ph=10;
+poverlap=10;
+pdistance = 38;
+
+module fairleed_holder() {
+    
+
+
+//translate([0,0,17])
+for (x = [0:positions]) {
+    rotate(pangle*x, [0,0,1])
+    translate([plen-pt/2,0,0])
+    difference() {
+        translate([0,0,-poverlap/2])
+    cube([pt,pwidth,ph+poverlap], center=true);
+        rotate(90,[0,1,0])
+        cylinder(r=1.5, h=20, center=true);
+    }
+}
+
+
+translate([0,0,pdistance])
+for (x = [0:positions]) {
+    rotate(pangle*x, [0,0,1])
+    translate([plen-pt/2,0,0])
+    difference() {
+        translate([0,0,poverlap/2])
+    cube([pt,pwidth,ph+poverlap], center=true);
+        rotate(90,[0,1,0])
+        cylinder(r=1.5, h=20, center=true);
+    }
+}
+//translate([plen+pt/2,0,0])
+//fairleed();
+}
+
+module fairleed() {
+    difference() {
+        
+    union() {
+        translate([0,0,pdistance/2])
+            cube([pt,pwidth,pdistance+ph], center=true);
+        translate([0,0,pdistance/2])
+        rotate(90,[0,1,0])
+        cylinder(r=10, h=pt, center=true);
+    }
+    
+        translate([0,0,pdistance/2])
+        rotate(90,[0,1,0])
+        cylinder(r=5, h=20, center=true);
+    
+        translate([0,0,0])
+        rotate(90,[0,1,0])
+        cylinder(r=2, h=20, center=true);
+    
+        translate([0,0,pdistance])
+        rotate(90,[0,1,0])
+        cylinder(r=2, h=20, center=true);
+    
+        translate([0,0,pdistance/2+9])
+        rotate(90,[0,1,0])
+        cylinder(r=2, h=20, center=true);
+
+}
+}
+
+
+module controller(neg = false) {
+    if (neg) {
+        translate([-7,0,0])
+            cube([15,43,58], center=true);
+    } else {
+        
+        translate([-1,0,0])
+        difference() {
+            color("black")
+                cube([2,43,58], center=true);
+            translate([0,21.5-12,29-12])
+                rotate(90,[0,1,0])
+                    cylinder(r=1.5, h=10, center=true);
+             translate([0,21.5-40.5,29-12])
+                rotate(90,[0,1,0])
+                    cylinder(r=1.5, h=10, center=true);
+             translate([0,21.5-24,29-43])
+                rotate(90,[0,1,0])
+                    cylinder(r=1.5, h=10, center=true);
+             translate([0,21.5-25.5,29-55.5])
+                rotate(90,[0,1,0])
+                    cylinder(r=1.5, h=10, center=true);
+             translate([0,21.5-40.5,29-55.5])
+                rotate(90,[0,1,0])
+                    cylinder(r=1.5, h=10, center=true);
+        }
+        color("blue")
+            translate([-7,0,24])
+                cube([10,43,8], center=true);
+        color("silver")
+            translate([-6,15,-12])
+                cube([8,10,32], center=true);
+            
+    }
+}
+
+module controller_mount() {
+    difference() {
+    hull() {
+    translate([-.95,0,0])
+        color("yellow")
+            cube([2,41,56], center=true);
+    translate([20,0,0])
+        color("yellow")
+            cube([2,31,46], center=true);
+    }
+             translate([0,21.5-24,29-43])
+                rotate(90,[0,1,0])
+                    cylinder(r=1.5, h=100, center=true);
+    controller();
+}
+}
+
+module controller_disp() {
+    rotate(4,[0,1,0])
+    translate([-26,42,51]) children();
+}
+//controller();
+//%controller(neg=true);
+//controller_mount();
+
 module enclosure() {
 
     
 difference() {
     union() {
         // base
-        translate([0,6,11.5])
+        translate([0,0,11.5])
             base();
         enclosure_blank();
+        controller_disp()
+            controller_mount(neg=false);
     }
     assembly(neg=true);
     pcb_disp() pcb_bolt_clearance();
     driveshaft();
     case_boltholes();
     // Motor wire hole
-    translate([22,40,88]) rotate(90,[0,1,0])
+    translate([12,40,88]) //rotate(90,[0,1,0])
         cylinder(r=3, h=20, center=true);
     // Encoder wire hole
     translate([20,22,-28]) rotate(90,[0,1,0])
@@ -338,8 +519,8 @@ module enclosure_top() {
 //enclosure_bottom();
 //enclosure_blank();
 //enclosure();
-//rotate(-90,[0,1,0])
-//enclosure_top();
+rotate(-90,[0,1,0])
+enclosure_top();
 //rotate(90,[0,1,0])
 //enclosure_bottom();
 //intersection() {
@@ -351,8 +532,9 @@ module enclosure_top() {
 //assembly(neg = false);
 //pcb_disp() pcb_bolt_clearance();
 //}
-//assembly(neg = false);
+//assembly(neg = true);
 //}
+//translate([0,0,36])
 //driveshaft();
 
 //        biggearvol(neg = neg);
