@@ -1,9 +1,13 @@
 include <driveshaft.scad>
 include <enc.scad>;
-use <gears.scad>;
+include <gears.scad>;
 use <12vmotor.scad>;
 shaft_height = 300;
-//$fs = .2;
+$fs = .2;
+
+enclosure_thickness = 1.5;
+
+assembly_height = biggear_diameter*biggear_neg_factor/2 + enclosure_thickness;
 
 case_bolts = [
 // [x,y,        rotation of trap
@@ -75,7 +79,7 @@ translate([0,0,200])
 //hull() {
 module pcb_disp() {
     encoder_disp()
-    translate([+pcb_x/2-h206_w,encoder_d/2+h206_base_t+3.5,1.5]) //1.5 encoder t/2
+    translate([+pcb_x/2-h206_w,encoder_d/2+h206_base_t+2.5,1.5]) //1.5 encoder t/2
     rotate(180, [0,1,0])
     rotate(90, [0,0,1])
     rotate(-90, [0,1,0]) children();
@@ -87,7 +91,7 @@ module encoder_disp() {
 
 module drive_gear_disp() {
     
-        translate([0,32,0])
+        translate([0,gear_distance,0])
             rotate(-90,[0,0,1]) children();
 }
 
@@ -96,7 +100,7 @@ module gm_disp() {
     rotate(180,[0,0,1])
             gmshaft_disp()
                 rotate(180, [0,0,1])
-                    translate([0,0,27])
+                    translate([0,0,18])
 //   rotate(50,[0,0,1])
                         children();
 }
@@ -122,7 +126,7 @@ module assembly(neg = false) {
             controller();
 }
 
-module enclosure_blank(neg = true, t = 1.5) {
+module enclosure_blank(neg = true, t = enclosure_thickness) {
     $fn = 30;
     //minkowski() {
         //union() {
@@ -165,7 +169,7 @@ base_w1 = shaft_diameter+tab_t*2;
 base_w2 = 70;
 skew=0;
 shift=0;
-base_h = 36.5;
+base_h = assembly_height;
 hole_d=6;
 
 screw_head_d=7;
@@ -269,7 +273,7 @@ base_w1 = 70;
 base_w2 = 100;
 skew=0;
 shift=15;
-base_h = 36.5;
+base_h = assembly_height;
     tab_t = 8;
     
     translate([0,shift,0])
@@ -467,7 +471,9 @@ module controller_mount() {
 
 module controller_disp() {
     rotate(4,[0,1,0])
-    translate([-26,42,51]) children();
+    //translate([-26,42,51])
+    gm_disp()
+    children();
 }
 //controller();
 //%controller(neg=true);
@@ -516,11 +522,11 @@ module enclosure_top() {
 }
 //intersection() {
 //enclosure_top();
-//enclosure_bottom();
+enclosure_bottom();
 //enclosure_blank();
 //enclosure();
-rotate(-90,[0,1,0])
-enclosure_top();
+//rotate(-90,[0,1,0])
+//enclosure_top();
 //rotate(90,[0,1,0])
 //enclosure_bottom();
 //intersection() {
@@ -529,13 +535,14 @@ enclosure_top();
 //encoder_pcb(neg=true);
 //projection(cut=true)
 //rotate(90, [0,1,0])
-//assembly(neg = false);
+assembly(neg = false);
+//%assembly(neg = true);
 //pcb_disp() pcb_bolt_clearance();
 //}
 //assembly(neg = true);
 //}
 //translate([0,0,36])
-//driveshaft();
+driveshaft();
 
 //        biggearvol(neg = neg);
 //     drive_gear_disp()

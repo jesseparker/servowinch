@@ -20,13 +20,17 @@ translate([-10,0,55])
     cube ([1,3,10], center=true);
 if (neg) {
     cylinder(r=34.5/2,h=65);
-    translate([0,0,1])
-    rotate(180,[0,1,0])
-            cylinder(r=32/2,h=12);
+    //translate([0,0,1])
+    //rotate(180,[0,1,0])
+            //cylinder(r=32/2,h=12);
     
-    translate([0,0,-3])
-    rotate(180,[0,1,0])
-            cylinder(r=45/2,h=24);
+gmshaft_disp()
+        rotate(180,[0,1,0])
+            cylinder(r=11,h=18);
+
+    //translate([0,0,-3])
+    //rotate(180,[0,1,0])
+            //cylinder(r=45/2,h=24);
 
 }
 gmshaft_disp()
@@ -39,4 +43,5 @@ translate([0,0,15/2])
 }
 }
 
-12vmotor(neg = true);
+//12vmotor(neg = false);
+//%12vmotor(neg = true);
