@@ -31,11 +31,12 @@ sensor_centers = 10;
 
 // shaft encoder
 encoder_d = 40;
+encoder_neg_factor=1.1;
 //encoder_d = 50;
 teeth = 6;
 tooth_length = 12;
 pi = 3.1415926;
-tooth_width = (d*pi)/(teeth*2);
+//tooth_width = (d*pi)/(teeth*2);
 tooth_angle = 360 / (teeth*2);
 bore = shaft_diameter+.5;
 hub_d = bore * 1.25;
@@ -116,7 +117,7 @@ module slot_shaft(d = 6, t = 3.5, h=10) {
 //wagon_wheel();
 module shaft_encoder(neg = false) {
     $fn=40;
-    neg_factor=1.1;
+    neg_factor=encoder_neg_factor;
     neg_factor_z=1.2;
   washer = 1;
   washer_w=2;  
@@ -252,8 +253,8 @@ module encoder_disp() {
      translate([0,0,-19]) children();
 }
 
-encoder_disp() shaft_encoder();
-pcb_disp() encoder_pcb(neg=false);
+//encoder_disp() shaft_encoder();
+//pcb_disp() encoder_pcb(neg=false);
 //%encoder_pcb(neg=true);
 //#pcb_bolt_clearance();
 

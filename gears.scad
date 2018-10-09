@@ -10,6 +10,7 @@ use <12vmotor.scad>
 //pi=3.14;
 in=25.4;
 dia=40;
+
 ratio=.33;
 
 N=30;

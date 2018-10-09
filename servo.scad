@@ -1,14 +1,44 @@
 include <driveshaft.scad>
 include <enc.scad>;
 include <gears.scad>;
-use <12vmotor.scad>;
+include <12vmotor.scad>;
 shaft_height = 300;
-$fs = .2;
+//$fs = .2;
 
+
+
+gm_z_offset = 18;
+gm_shaft_offset = 8;
+controller_length=58;
 enclosure_thickness = 1.5;
 
-assembly_height = biggear_diameter*biggear_neg_factor/2 + enclosure_thickness;
 
+//dia=10; // main gear d;
+//encoder_d = 20;
+//gm_major_diameter=18.5;
+dictated_assembly_height=0;
+dictated_assembly_width=0;
+dictated_assembly_length=0;
+
+assembly_height = max(
+    biggear_diameter*biggear_neg_factor/2 + enclosure_thickness,
+    encoder_d*encoder_neg_factor/2 + enclosure_thickness,
+    gm_major_diameter/2 + enclosure_thickness,
+    dictated_assembly_height
+);
+
+assembly_width = max(
+    gm_major_diameter + dia + enclosure_thickness*2,
+    dictated_assembly_width
+);
+
+assembly_length = max(
+    gm_major_length + gm_z_offset + enclosure_thickness,
+    dictated_assembly_length
+);
+
+echo ("max");
+echo (assembly_height);
 case_bolts = [
 // [x,y,        rotation of trap
     [-4,-29,     -1],
@@ -98,11 +128,16 @@ module drive_gear_disp() {
 module gm_disp() {
     drive_gear_disp()
     rotate(180,[0,0,1])
-            gmshaft_disp()
+            gm_shaft_disp()
                 rotate(180, [0,0,1])
-                    translate([0,0,18])
+                    translate([0,0,gm_z_offset])
 //   rotate(50,[0,0,1])
                         children();
+}
+
+module controller_disp() {
+    translate([-gm_major_diameter/2-enclosure_thickness,gear_distance+gm_shaft_offset,controller_length/2+gm_z_offset])
+    children();
 }
 
 module sub_gears_encoder(neg = neg) {
@@ -261,16 +296,16 @@ module pillow_pair() {
     pillow_bottom();
 }
 //pillow_pair();
-//translate([0,70,0]) rotate(180,[0,1,0]) pillow(screws=falses);
+//translate([0,0,140]) //rotate(180,[0,1,0]) pillow(screws=falses);
 //pillow();
 //pillow_top();
 //pillow_bottom();
 
 //driveshaft();
 module base() {
-base_t = 20;
-base_w1 = 70;
-base_w2 = 100;
+base_t = t;
+base_w1 = assembly_width;
+base_w2 = base_w1;
 skew=0;
 shift=15;
 base_h = assembly_height;
@@ -335,9 +370,9 @@ base_h = assembly_height;
 
 }
 
-rotate(-90-pangle/2, [0,0,1])
-translate([0,0,18])
-fairleed_holder();
+//rotate(-90-pangle/2, [0,0,1])
+//translate([0,0,18])
+//fairleed_holder();
 
 }
 //base();
@@ -419,7 +454,7 @@ module fairleed() {
 module controller(neg = false) {
     if (neg) {
         translate([-7,0,0])
-            cube([15,43,58], center=true);
+            cube([15,43,controller_length], center=true);
     } else {
         
         translate([-1,0,0])
@@ -469,12 +504,7 @@ module controller_mount() {
 }
 }
 
-module controller_disp() {
-    rotate(4,[0,1,0])
-    //translate([-26,42,51])
-    gm_disp()
-    children();
-}
+
 //controller();
 //%controller(neg=true);
 //controller_mount();
@@ -485,7 +515,7 @@ module enclosure() {
 difference() {
     union() {
         // base
-        translate([0,0,11.5])
+        translate([0,0,t/2])
             base();
         enclosure_blank();
         controller_disp()
@@ -494,7 +524,7 @@ difference() {
     assembly(neg=true);
     pcb_disp() pcb_bolt_clearance();
     driveshaft();
-    case_boltholes();
+    case_boltholes(boss=false);
     // Motor wire hole
     translate([12,40,88]) //rotate(90,[0,1,0])
         cylinder(r=3, h=20, center=true);
@@ -530,20 +560,22 @@ enclosure_bottom();
 //rotate(90,[0,1,0])
 //enclosure_bottom();
 //intersection() {
-//    enclosure_top();
+ //   enclosure_top();
 //pcb_bolt_clearance();
 //encoder_pcb(neg=true);
 //projection(cut=true)
 //rotate(90, [0,1,0])
-assembly(neg = false);
+//assembly(neg = false);
 //%assembly(neg = true);
 //pcb_disp() pcb_bolt_clearance();
 //}
 //assembly(neg = true);
 //}
 //translate([0,0,36])
-driveshaft();
+//driveshaft();
 
 //        biggearvol(neg = neg);
 //     drive_gear_disp()
 //       littlegearvol(neg = neg);
+//translate([0,0,140]) //rotate(180,[0,1,0]) pillow(screws=falses);
+//pillow();
