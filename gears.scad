@@ -11,7 +11,7 @@ use <12vmotor.scad>
 in=25.4;
 dia=40;
 
-ratio=.33;
+ratio=.5;
 
 N=30;
 N2=floor(N*ratio);

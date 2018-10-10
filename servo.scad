@@ -6,12 +6,12 @@ shaft_height = 300;
 //$fs = .2;
 
 
-
 gm_z_offset = 18;
 gm_shaft_offset = 8;
 controller_length=58;
 enclosure_thickness = 1.5;
-
+encoder_offset_z=-19;
+pcb_offset_x=pcb_x/2-h206_w,encoder_d/2+h206_base_t+2.5;
 
 //dia=10; // main gear d;
 //encoder_d = 20;
@@ -28,12 +28,12 @@ assembly_height = max(
 );
 
 assembly_width = max(
-    gm_major_diameter + dia + enclosure_thickness*2,
+    (biggear_diameter * biggear_neg_factor)/2 + (littlegear_diameter*littlegear_neg_factor)/2 + gear_distance + enclosure_thickness*2,
     dictated_assembly_width
 );
 
 assembly_length = max(
-    gm_major_length + gm_z_offset + enclosure_thickness,
+    gm_major_length + gm_z_offset ,
     dictated_assembly_length
 );
 
@@ -41,7 +41,7 @@ echo ("max");
 echo (assembly_height);
 case_bolts = [
 // [x,y,        rotation of trap
-    [-4,-29,     -1],
+    [-5,-dia/2+2,     -1],
     [-6,37,     -1],
  //   [40,16,     -1],
  //   [40,64.5,     -1],
@@ -109,14 +109,14 @@ translate([0,0,200])
 //hull() {
 module pcb_disp() {
     encoder_disp()
-    translate([+pcb_x/2-h206_w,encoder_d/2+h206_base_t+2.5,1.5]) //1.5 encoder t/2
+    translate([pcb_offset_x,1.5]) //1.5 encoder t/2
     rotate(180, [0,1,0])
     rotate(90, [0,0,1])
     rotate(-90, [0,1,0]) children();
 }
 
 module encoder_disp() {
-     translate([0,0,-19]) children();
+     translate([0,0,encoder_offset_z]) children();
 }
 
 module drive_gear_disp() {
@@ -305,9 +305,9 @@ module pillow_pair() {
 module base() {
 base_t = t;
 base_w1 = assembly_width;
-base_w2 = base_w1;
+base_w2 = base_w1+20;
 skew=0;
-shift=15;
+shift= (assembly_width - biggear_diameter*biggear_neg_factor)/2-enclosure_thickness;
 base_h = assembly_height;
     tab_t = 8;
     
@@ -339,7 +339,7 @@ base_h = assembly_height;
 }
 
     //translate([0,0,72]) pillow();
-    translate([0,shift,72])
+    translate([0,shift,assembly_length-enclosure_thickness*2-t/2])
     difference() {
     union() {
    //translate([base_h/2,0,0])

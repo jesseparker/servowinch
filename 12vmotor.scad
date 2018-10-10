@@ -1,5 +1,6 @@
 gm_major_diameter=38.5;
 gm_major_length= 65;
+gm_shaft_offset = 8;
 
 module dshaft(d = 6, dee = 0.7, h = 5.8){
     difference() {
@@ -27,6 +28,7 @@ if (neg) {
     //rotate(180,[0,1,0])
             //cylinder(r=32/2,h=12);
     
+    translate([0,0,0.01])
 gm_shaft_disp()
         rotate(180,[0,1,0])
             cylinder(r=11,h=18);
@@ -47,4 +49,4 @@ translate([0,0,15/2])
 }
 
 //12vmotor(neg = false);
-//%12vmotor(neg = true);
+//s%12vmotor(neg = true);
