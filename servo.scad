@@ -11,7 +11,8 @@ gm_shaft_offset = 8;
 controller_length=58;
 enclosure_thickness = 1.5;
 encoder_offset_z=-19;
-pcb_offset_x=pcb_x/2-h206_w,encoder_d/2+h206_base_t+2.5;
+pcb_offset_y=encoder_d/2+h206_base_t+2.5;
+gm_shaft_offset = 8;
 
 //dia=10; // main gear d;
 //encoder_d = 20;
@@ -33,7 +34,7 @@ assembly_width = max(
 );
 
 assembly_length = max(
-    gm_major_length + gm_z_offset ,
+    gm_major_length + gm_z_offset,
     dictated_assembly_length
 );
 
@@ -42,12 +43,12 @@ echo (assembly_height);
 case_bolts = [
 // [x,y,        rotation of trap
     [-5,-dia/2+2,     -1],
-    [-6,37,     -1],
+    [-6,pcb_offset_y+6.5,     -1],
  //   [40,16,     -1],
  //   [40,64.5,     -1],
  //   [97,40,     -1],
-    [83,-20,     -1],
-    [83,18,     -1],
+    [assembly_length+enclosure_thickness-t/2,-shaft_diameter/2-5,     -1],
+    [assembly_length+enclosure_thickness-t/2,shaft_diameter/2+5,     -1],
 ];
 
 
@@ -109,10 +110,11 @@ translate([0,0,200])
 //hull() {
 module pcb_disp() {
     encoder_disp()
-    translate([pcb_offset_x,1.5]) //1.5 encoder t/2
-    rotate(180, [0,1,0])
+    translate([-pcb_y/2+h206_w,pcb_offset_y,1.5]) //1.5 encoder t/2
+    rotate(0, [0,1,0])
     rotate(90, [0,0,1])
-    rotate(-90, [0,1,0]) children();
+    rotate(-90, [0,1,0])
+    children();
 }
 
 module encoder_disp() {
@@ -306,6 +308,8 @@ module base() {
 base_t = t;
 base_w1 = assembly_width;
 base_w2 = base_w1+20;
+base_mount_hole_r=t/3.5;
+    
 skew=0;
 shift= (assembly_width - biggear_diameter*biggear_neg_factor)/2-enclosure_thickness;
 base_h = assembly_height;
@@ -326,10 +330,10 @@ base_h = assembly_height;
     // base mount holes
     translate([base_h,base_w2/2+4+skew,0])
         rotate(90,[0,1,0])
-            cylinder(r=3, h=40, center=true);
+            cylinder(r=base_mount_hole_r, h=40, center=true);
     translate([base_h,-base_w2/2-4+skew,0])
         rotate(90,[0,1,0])
-            cylinder(r=3, h=40, center=true);
+            cylinder(r=base_mount_hole_r, h=40, center=true);
     }
 }
     //cable channel through base
@@ -339,7 +343,7 @@ base_h = assembly_height;
 }
 
     //translate([0,0,72]) pillow();
-    translate([0,shift,assembly_length-enclosure_thickness*2-t/2])
+    translate([0,shift,assembly_length+enclosure_thickness-t])
     difference() {
     union() {
    //translate([base_h/2,0,0])
@@ -358,10 +362,10 @@ base_h = assembly_height;
     // base mount holes
     translate([base_h,base_w2/2+4+skew,0])
         rotate(90,[0,1,0])
-            cylinder(r=3, h=40, center=true);
+            cylinder(r=base_mount_hole_r, h=40, center=true);
     translate([base_h,-base_w2/2-4+skew,0])
         rotate(90,[0,1,0])
-            cylinder(r=3, h=40, center=true);
+            cylinder(r=base_mount_hole_r, h=40, center=true);
     }
 }
     //cable channel through base
@@ -526,11 +530,12 @@ difference() {
     driveshaft();
     case_boltholes(boss=false);
     // Motor wire hole
-    translate([12,40,88]) //rotate(90,[0,1,0])
+    translate([-10,gear_distance+gm_shaft_offset,assembly_length]) //rotate(90,[0,1,0])
         cylinder(r=3, h=20, center=true);
     // Encoder wire hole
-    translate([20,22,-28]) rotate(90,[0,1,0])
-        cylinder(r=3, h=20, center=true);
+    translate([-12,20,-35]) rotate(90,[0,1,0])
+        rotate(90,[0,1,0])
+        #cylinder(r=3, h=20, center=true);
 
 }
 }
@@ -565,7 +570,7 @@ enclosure_bottom();
 //encoder_pcb(neg=true);
 //projection(cut=true)
 //rotate(90, [0,1,0])
-//assembly(neg = false);
+assembly(neg = false);
 //%assembly(neg = true);
 //pcb_disp() pcb_bolt_clearance();
 //}
